@@ -1,0 +1,12 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+
+namespace Moneymo.AuthenticationService.API.DTO
+{
+    public class CheckTokenRequestDTO
+    {
+        public string Token { get; set; }
+    }
+}

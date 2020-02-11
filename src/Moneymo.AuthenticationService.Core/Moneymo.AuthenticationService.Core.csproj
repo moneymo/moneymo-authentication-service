@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+   <OutputType>Library</OutputType>
+    <TargetFramework>netcoreapp2.2</TargetFramework>
+    <RestoreSources>https://packages.moneymo.com/v3/index.json;https://api.nuget.org/v3/index.json</RestoreSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Moneymo.AuthenticationService.Data\Moneymo.AuthenticationService.Data.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+        <PackageReference Include="moneymo.core.apiresponsewrapper" Version="1.2.1" />
+  </ItemGroup>
+</Project>
