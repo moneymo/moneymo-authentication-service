@@ -9,6 +9,10 @@ using Moneymo.AuthenticationService.Core.Services;
 using Moneymo.AuthenticationService.Data.Models;
 using moneymo.core.apiresponsewrapper.Extensions;
 using Moneymo.AuthenticationService.Core;
+using System;
+using Newtonsoft.Json.Serialization;
+using Newtonsoft.Json;
+using moneymo.core.apiresponsewrapper;
 
 namespace Moneymo.AuthenticationService.API
 {
@@ -28,6 +32,8 @@ namespace Moneymo.AuthenticationService.API
             Configuration = builder.Build();
         }
 
+        private readonly string SpecificOrigins = "auth-origins";
+
         public IConfiguration Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
@@ -42,27 +48,42 @@ namespace Moneymo.AuthenticationService.API
             Configuration.GetSection("AuthenticationService").Bind(authServiceConfiguration);
 
             services.AddSingleton(authServiceConfiguration);
-
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            services.AddCors(options =>
+                {
+                    options.AddPolicy(SpecificOrigins,
+                  builder =>
+                  {
+                      builder.SetIsOriginAllowed(isOriginAllowed: _=> true).AllowAnyHeader().AllowAnyMethod();
+                  });
+                   
+                });
+            services.AddMvc(MvcOptions()).AddJsonOptions(JsonOptions()).SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            app.UseAPIResponseWrapperMiddleware();
-            if (env.IsDevelopment())
+            if (!env.IsDevelopment())
             {
-               // app.UseDeveloperExceptionPage();
-            }
-            else
-            {
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
-               
-            app.UseHttpsRedirection();
+            app.UseAPIResponseWrapperMiddleware();
+            app.UseCors(SpecificOrigins);
+            //app.UseHttpsRedirection();
 
             app.UseMvc();
         }
+
+        private Action<MvcOptions> MvcOptions() => options =>
+        {
+            options.Filters.Add(typeof(ModelValidatorFilter));
+            options.Filters.Add(new ProducesAttribute("application/json"));
+        };
+        private Action<MvcJsonOptions> JsonOptions() => options =>
+        {
+            options.SerializerSettings.ContractResolver = new DefaultContractResolver { NamingStrategy = new SnakeCaseNamingStrategy() };
+            options.SerializerSettings.NullValueHandling = NullValueHandling.Ignore;
+            options.SerializerSettings.DateTimeZoneHandling = DateTimeZoneHandling.Utc;
+        };
     }
 }

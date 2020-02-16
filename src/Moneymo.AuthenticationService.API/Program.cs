@@ -19,10 +19,14 @@ namespace Moneymo.AuthenticationService.API
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args)
         {
-            var config = new ConfigurationBuilder().SetBasePath(Directory.GetCurrentDirectory()).AddJsonFile("appsettings.json", optional: false).Build();
+            var config = new ConfigurationBuilder()
+            .SetBasePath(Directory.GetCurrentDirectory())
+            .AddJsonFile("hostsettings.json", optional: true)
+            .AddCommandLine(args)
+            .Build();
 
             var webhost = WebHost.CreateDefaultBuilder(args)
-                   .UseUrls($"http://localhost:{config.GetValue<int>("Host:Port")}")
+                   .UseConfiguration(config)
                      .UseStartup<Startup>();
 
             return webhost;

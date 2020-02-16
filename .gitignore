@@ -238,3 +238,5 @@ _Pvt_Extensions
 
 # Visual Studio Code
 .vscode/
+
+hostsettings.json
